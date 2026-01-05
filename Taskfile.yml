@@ -1,0 +1,28 @@
+---
+version: '3'
+tasks:
+  build:
+    label: "Build {{.JSONNET_SOURCE}}"
+    desc: "Build {{.JSONNET_SOURCE}} using Jsonnet"
+    vars:
+      JSONNET_SOURCE: flexoki.jsonnet
+    sources:
+    - flexoki.jsonnet
+    - lib/*.libsonnet
+    generates:
+    - palette-*.json
+    cmds:
+    - > 
+      jsonnet {{ .JSONNET_INCLUDE_DIRS | default "-J ." }} \
+              -S \
+              -m {{.JSONNET_BUILD_DIR | default "." }} \
+              {{.JSONNET_SOURCE}} {{ if .JSONNET_EXTRAS }}{{ .JSONNET_EXTRAS }}{{ end }} {{ if .CLI_ARGS }}{{ .CLI_ARGS }}{{ end }}
+  clean:
+    cmds:
+    - rm -rf {{ .GENERATED_FILES | join " " }}
+    vars:
+      GENERATED_FILES:
+      - palette-*.json
+  default:
+    cmds:
+    - task: build
